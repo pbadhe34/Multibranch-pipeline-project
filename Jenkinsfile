@@ -1,4 +1,4 @@
-pipeline {
+ pipeline {
 
     agent {
         node {
@@ -60,7 +60,7 @@ pipeline {
                 """
 
                 sh """
-                echo "Deploying Code"
+                echo "Deploying Code by Feature"
                 """
             }
         }
