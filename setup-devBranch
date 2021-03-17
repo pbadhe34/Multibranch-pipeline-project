@@ -14,6 +14,8 @@ tep 1: From your project repository, bring in the changes and test.
 git fetch origin
 git checkout -b develop origin/develop
 git merge master
+
+
 Step 2: Merge the changes and update on GitHub.
 
 git checkout master
