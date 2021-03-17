@@ -1,0 +1,101 @@
+A Jenkins pipeline to build and deploy an application with the following conditions.
+
+1
+Development starts with a feature branch by developers committing code to the feature branch.
+
+ 2. 
+Whenever a developer raises a PR from the feature branch to develop a branch, a Jenkins pipeline should trigger to run a unit test and static code analysis. 
+
+ 3.
+After testing the code successfully in the feature branch, the developer merges the PR to the develop branch.
+
+4.
+When the code is ready for release, developers raise a PR from the develop branch to the master. It should trigger a build pipeline that will run the unit test cases, code analysis, push artifact, and deploys it to dev/QA environments.
+
+ 5.
+From the above conditions, you can see that there is no manual trigger of Jenkins jobs, and whenever there is a pull request for a branch, the pipeline needs to be triggered automatically and run the required steps for that branch. 
+
+This workflow builds a  feedback loop for team members and avoids dependence on the DevOps team to build and deploy in non-prod environments.
+
+Developer can check the build status on Github and take decisions on what to do next.
+
+This workflow can be achieved easily through a Jenkins multi-branch pipeline.
+
+
+ How the multi-branch pipeline works.
+
+When a developer creates a PR from a feature branch to develop a branch, Github sends a webhook with the  PR information to Jenkins.
+Jenkins receives the PR and finds the relevant multibranch pipeline, and creates a feature branch pipeline automatically. It then runs the jobs with the steps mentioned in the Jenkinsfile from the feature branch. During checkout, the source and target branches in the PR gets merged. The PR merge will be blocked on Github until a build status from Jenkins is returned.
+
+Once the build finishes, Jenkins will update the status to Github PR. Now you will be able to merge the code. If you want to check the Jenkins build logs, you can find the Jenkins build log link in the PR status.
+
+Multibranch Pipleline Jenkinsfile. 
+
+For the multibranch pipeline to work,  need to have the Jenkinsfile in the SCM repo.
+
+ Jenkins scans the configured Github repo for all the branches which has a PR raised.
+
+ The job scanning the three branches, and if no mmembers  raised any pull request, Jenkins won’t create any branch-based pipeline. 
+  The configurations on the Jenkins side to scan branches based on the PR requests.
+
+To have a complete workflow, need to have a webhook configured in Github to send all the repo events (commits, PR etc) to Jenkins as the pipelines can be triggered automatically.
+
+__************************__________________________________
+  Configure Webhook For Multibranch Pipeline
+ 
+ The Webhooks allow external services to be notified when certain events happen. 
+ When the specified events happen, we’ll send a POST request to each of the URLs  provided. 
+
+L 
+
+ Oover to the Github repo and click on the settings.-->Add WebHook"
+  Add the Jenkins URL followed by “/github-webhook/” under payload URL. Select the content type as “application/json” and click “Add Webhook"
+
+ Choose what type of webhook you want to receive in Jenkins. 
+ For example, you want to trigger the pipeline only during PR; then, you can select just the PR event from the “Let me select individual events” option.
+
+see a green tick mark on a successful webhook configuration as shown below.
+
+
+If you don’t see a green tick or see a warning sign, click on the webhook link, scroll down to “Recent Deliveries,” and click on the last webhook. 
+ You should be able to view why the webhook delivery failed with the status code.
+Done with all the required configurations for the multi-branch pipeline. 
+ The next step is to test the multi-branch pipeline workflow triggers.
+
+--------------------
+Test Multi-branch Pipeline
+For demo purpose, select the option “Only Branches that are file as PR“. With this option, only the branches with a PR request gets discovered.
+
+  Update some content in the  file in the feature branch and raise a PR to develop. 
+ It will send a webhook to Jenkins and Jenkins will send back the Jenkins job details and the PR will go to check state.
+
+click the “Details” it will take you to the Jenkins build log. You can write custom check in your Jenkinsfile that can be used for the build reviews.
+
+check Jenkins -->find a pipeline for feature branch in Jenkins 
+
+In the Jenkinfile, a condition to skip the deploy stage if the branch is not develop. 
+ You can check that in the Jenkins build log. Also, If you check the build flow in the blue ocean dashboard you can clearly see the skipped deployment stage also.
+Now merge the feature branch PR and raise a new PR from develop to the master branch.
+
+Jenkins will receive the webhook from Github for the new PR and the develop pipeline gets created as shown below.
+
+For develop branch, the deploy stage is enabled and if you check the Blue Ocean build flow you can see all the stages successfully triggered.
+******************************
+
+Jenkins Pipeline Vs. Multibranch Pipeline
+A normal pipeline job is meant for building a single branch from the SCM and deploy to a single environment. However, you can 
+
+A multibranch pipeline is meant for building multiple branches from a repository and deploy to multiple environments if required.
+
+A pipeline job supports both pipeline steps to be added in Jenkins configuration and form SCM.
+
+Use pipeline job for adhoc jobs, parameterised job executions and to debug pipeline as code.
+
+Do not use multibranch pipeline if you do not have a standard branching and CI/CD strategy.
+****************
+ Mullitbranch pipleine can only configure pipelines for a single Git repository. Whereas a Jenins Github organization project can automatically configure multi-branch pipelines for all the repos in a Github organization. 
+******************
+t can discover all the repositories in the configured Github organization, with a Jenkinsfile.
+ 
+
+
